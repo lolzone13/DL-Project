@@ -28,14 +28,14 @@ class Human(Button):
 		)
 
 def input(key):
-	if key == "w":
-		print(player.position)
-		direction = Vec3(
-            player.forward * (held_keys['w'] - held_keys['s'])
-            + player.right * (held_keys['d'] - held_keys['a'])
-            ).normalized()  
-		hit_info = boxcast(player.position, thickness=(3,3), direction=direction, debug=False)
-		print(hit_info.distance)
+	# current drone position
+	# boxcast data
+	direction = Vec3(
+		player.forward * (held_keys['w'] - held_keys['s'])
+		+ player.right * (held_keys['d'] - held_keys['a'])
+		).normalized()  
+	hit_info = boxcast(player.position, thickness=(3,3), direction=direction, debug=False)
+
 
 
 
@@ -60,7 +60,6 @@ grid = [
 
 # walls, create them programmatically based on grid
 make_walls(grid)
-
 
 num = 100
 humans=[None]*num

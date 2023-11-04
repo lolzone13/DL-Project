@@ -33,8 +33,6 @@ class WindowCapture:
         self.w = window_rect[2] - window_rect[0]
         self.h = window_rect[3] - window_rect[1]
 
-        print(window_rect)
-
         border_pixels = 8
         titlebar_pixels = 40
         self.w = self.w - (border_pixels)
@@ -45,7 +43,6 @@ class WindowCapture:
         self.offset_y = window_rect[1] + self.cropped_y
 
     def get_screenshot(self):
-
         wDC = win32gui.GetWindowDC(self.hwnd)
         dcObj = win32ui.CreateDCFromHandle(wDC)
         cDC = dcObj.CreateCompatibleDC()
@@ -65,28 +62,28 @@ class WindowCapture:
         win32gui.DeleteObject(dataBitMap.GetHandle())
         img = img[...,:3]
         img = np.ascontiguousarray(img)
-
         return img
-
-
 
 def draw_boxes(img, boxes, cls_dict):
     for box in boxes:
         xyxy = box.xyxy[0]
         cls = cls_dict[int(box.cls)]
         conf = round(box.conf.item(), 2)
-        if cls=='person' and conf>0.5:
+        if cls == 'person' and conf>0.5:
             cv2.rectangle(img, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), (0,255,0), 2)
             cv2.putText(img, str(conf), (int(xyxy[0]), int(xyxy[1])-10), cv2.FONT_HERSHEY_PLAIN, 1,(0,0,255), 2)
-
 
 if __name__ == "__main__":
     model = YOLO("yolov8s.pt")
     wincap = WindowCapture("ursina")
     cls_dict = model.names
+    detect_matrix = np.zeros((17,17))
     while True:
         frame = wincap.get_screenshot()
         frame = cv2.resize(frame, (640,640))
+        frame = cv2.line(frame, (0,200), (640, 200), (0,0,255), 1)
+
+
         res = model(frame, verbose=False)
         boxes = res[0].boxes
         if boxes.shape[0]:
