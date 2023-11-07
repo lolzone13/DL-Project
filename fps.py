@@ -30,18 +30,20 @@ class Human(Button):
 def input(key):
 	# current drone position
 	# boxcast data
-	direction = Vec3(
-		player.forward * (held_keys['w'] - held_keys['s'])
-		+ player.right * (held_keys['d'] - held_keys['a'])
-		).normalized()  
-	hit_info = boxcast(player.position, thickness=(3,3), direction=direction, debug=False)
+	if key=="w":
+		direction = Vec3(
+			player.forward * (held_keys['w'] - held_keys['s'])
+			+ player.right * (held_keys['d'] - held_keys['a'])
+			).normalized()  
+		hit_info = boxcast(player.position, thickness=(3,3), direction=direction, debug=False)
+		print(player.position)
 
 
 
 
 app = Ursina(size=(640,640), borderless=False, vsync=False)
 Sky()
-player = FirstPersonController(y=5, origin_y=-.5, gravity=0)
+player = FirstPersonController(y=5, origin_y=-.5, gravity=0, speed=10)
 ground = Entity(model='plane', scale=(170, 1, 170), color=color.lime, texture="white_cube",
 				texture_scale=(100, 100), collider='box')
 
@@ -69,4 +71,7 @@ for i in range(num):
 	sz=uniform(-50, 50)
 	humans[i]=Human(sx, 0, sz)
 
-app.run()
+done = False
+while not done:
+	app.step()
+	
