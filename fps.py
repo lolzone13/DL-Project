@@ -2,71 +2,76 @@ from ursina import *
 from random import uniform
 from ursina.prefabs.first_person_controller import FirstPersonController
 
-# def input(key):
-# 	if key=="left mouse down":
-# 		Audio("assets/laser_sound.wav")
-# 		Animation("assets/spark", parent=camera.ui, fps=5, scale=.1, position=(.19, -.03), loop=False)
+window.title = "engine"
 
-# 		for wasp in wasps:
-# 			if wasp.hovered:
-# 				destroy(wasp)
-# 		for spider in spiders:
-# 			if spider.hovered:
-# 				destroy(spider)
+def make_walls(grid, scale=(10, 50, 10)):
+	number_of_walls = 100
 
-# class Wasp(Button):
-# 	def __init__(self, x, y, z):
-# 		super().__init__(
-# 			parent=scene,
-# 			model="assets/wasp.obj",
-# 			scale=.1,
-# 			position=(x,y,z),
-# 			rotation=(0, 90, 0),
-# 			collider="box"
-# 			)
+	walls = [None]*number_of_walls
 
-# class Spider(Button):
-# 	def __init__(self, x, y, z):
-# 		super().__init__(
-# 			parent=scene,
-# 			model="assets/spider.obj",
-# 			scale=.02,
-# 			position=(x,y,z),
-# 			rotation=(0, 90, 0),
-# 			collider="box"
-# 			)
+	for i in range(len(grid)):
+		for j in range(len(grid[0])):
+			if grid[i][j]:
+				walls[i*10 + j] = Entity(model="cube", collider="box", position=(20*i - 100, 0, 20*j - 100), scale=scale, rotation=(0,0,0),
+								texture="brick", texture_scale=(5,5), color=color.rgb(255, 128, 0))
 
-app=Ursina()
 
+class Human(Button):
+	def __init__(self, x, y, z):
+		super().__init__(
+			parent=scene,
+			model="assets/person_tom_1.obj",
+			scale=1,
+			position=(x,y,z),
+			rotation=(0, 90, 0),
+			collider="box"
+		)
+
+def input(key):
+	# current drone position
+	# boxcast data
+	if key=="w":
+		direction = Vec3(
+			player.forward * (held_keys['w'] - held_keys['s'])
+			+ player.right * (held_keys['d'] - held_keys['a'])
+			).normalized()  
+		hit_info = boxcast(player.position, thickness=(3,3), direction=direction, debug=False)
+		print(player.position)
+
+
+
+
+app = Ursina(size=(640,640), borderless=False, vsync=False)
 Sky()
-player=FirstPersonController(y=2, origin_y=-.5)
-ground=Entity(model='plane', scale=(100, 1, 100), color=color.lime, texture="white_cube",
-	texture_scale=(100, 100), collider='box')
+player = FirstPersonController(y=5, origin_y=-.5, gravity=0, speed=10)
+ground = Entity(model='plane', scale=(170, 1, 170), color=color.lime, texture="white_cube",
+				texture_scale=(100, 100), collider='box')
 
-# wall_1=Entity(model="cube", collider="box", position=(-8, 0, 0), scale=(8, 5, 1), rotation=(0,0,0),
-# 	texture="brick", texture_scale=(5,5), color=color.rgb(255, 128, 0))
-# wall_2 = duplicate(wall_1, z=5)
-# wall_3=duplicate(wall_1, z=10)
-# wall_4=Entity(model="cube", collider="box", position=(-15, 0, 10), scale=(1,5,20), rotation=(0,0,0),
-# 	texture="brick", texture_scale=(5,5), color=color.rgb(255, 128, 0))
+grid = [
+	[0, 0, 0, 0, 1, 0, 1, 1, 0, 0],
+	[0, 1, 1, 1, 0, 0, 0, 1, 0, 0],
+	[0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 1, 0, 0, 0, 1, 1, 1, 0],
+	[0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+	[0, 0, 1, 0, 0, 0, 0, 0, 1, 1],
+	[0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+	[0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 1],
+]
 
-# gun=Entity(model="assets/gun.obj", parent=camera.ui, scale=.08, color=color.gold, position=(.3, -.2),
-# 	rotation=(-5, -10, -10))
+# walls, create them programmatically based on grid
+make_walls(grid)
 
-# num=6
-# wasps=[None]*num
-# spiders=[None]*num
-# for i in range(num):
-# 	wx=uniform(-12, -7)
-# 	wy=uniform(.1, 1.8)
-# 	wz=uniform(.8, 3.8)
-# 	wasps[i]=Wasp(wx, wy, wz)
-# 	wasps[i].animate_x(wx+.5, duration=.2, loop=True)
+num = 100
+humans=[None]*num
+for i in range(num):
+	sx=uniform(-50, 50)
+	sy=uniform(-50, 50)
+	sz=uniform(-50, 50)
+	humans[i]=Human(sx, 0, sz)
 
-# 	sx=uniform(-12, -7)
-# 	sy=uniform(.1, 1.8)
-# 	sz=uniform(5.8, 8.8)
-# 	spiders[i]=Spider(sx, sy, sz)
-# 	spiders[i].animate_x(sx+.5, duration=.2, loop=True)
-
-app.run()
+done = False
+while not done:
+	app.step()
+	
